@@ -15,11 +15,12 @@ THREEx.SolidWireframeMaterial	= function(geometry){
 
 	setupAttributes( geometry, values );
 
+	var shader	= THREEx.SolidWireframeMaterial.Shader
 	var material	= new THREE.ShaderMaterial({
-		uniforms	: {},
+		uniforms	: THREE.UniformsUtils.clone(shader.uniforms),
 		attributes	: attributes,
-		vertexShader	: THREEx.SolidWireframeMaterial.vertexShader,
-		fragmentShader	: THREEx.SolidWireframeMaterial.fragmentShader,
+		vertexShader	: shader.vertexShader,
+		fragmentShader	: shader.fragmentShader,
 	});
 	
 	return material;
@@ -36,55 +37,54 @@ THREEx.SolidWireframeMaterial	= function(geometry){
 	}
 }
 
-/**
- * the vertex shader
- * @type {String}
- */
-THREEx.SolidWireframeMaterial.vertexShader	= [
-	"attribute vec4 center;",
-	"varying vec4 vCenter;",
+THREEx.SolidWireframeMaterial.Shader = {
+	uniforms: {
+		"lineWidth"	: { type: "f", value: 5.0 },
+	},
+	vertexShader: [
+		"attribute vec4 center;",
+		"varying vec4 vCenter;",
 
-	"void main() {",
-		"vCenter = center;",
-		"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
-	"}",
-].join('\n')
-
-/**
- * the fragment shader
- * @type {String}
- */
-THREEx.SolidWireframeMaterial.fragmentShader	= [
-	"#extension GL_OES_standard_derivatives : enable",
-
-	"varying vec4 vCenter;",
-
-	"float edgeFactorTri() {",
-		"vec3 d = fwidth( vCenter.xyz );",
-		"vec3 a3 = smoothstep( vec3( 0.0 ), d * 1.5, vCenter.xyz );",
-		"return min( min( a3.x, a3.y ), a3.z );",
-	"}",
-
-	"float edgeFactorQuad1() {",
-		"vec2 d = fwidth( vCenter.xy );",
-		"vec2 a2 = smoothstep( vec2( 0.0 ), d * 1.5, vCenter.xy );",
-		"return min( a2.x, a2.y );",
-	"}",
-
-	"float edgeFactorQuad2() {",
-		"vec2 d = fwidth( 1.0 - vCenter.xy );",
-		"vec2 a2 = smoothstep( vec2( 0.0 ), d * 1.5, 1.0 - vCenter.xy );",
-		"return min( a2.x, a2.y );",
-	"}",
-
-	"void main() {",
-		"if ( vCenter.w == 0.0 ) {",
-			"gl_FragColor.rgb = mix( vec3( 1.0 ), vec3( 0.2 ), edgeFactorTri() );",
-		"} else {",
-			"gl_FragColor.rgb = mix( vec3( 1.0 ), vec3( 0.2 ), min( edgeFactorQuad1(), edgeFactorQuad2() ) );",
-
+		"void main() {",
+			"vCenter = center;",
+			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
 		"}",
-		"gl_FragColor.a = 1.0;",
-	"}",
-].join('\n')
+	].join('\n'),
+ 
+	fragmentShader	: [
+		"#extension GL_OES_standard_derivatives : enable",
+
+		"varying vec4 vCenter;",
+		// control parameter
+		"uniform float lineWidth;",
+
+		"float edgeFactorTri() {",
+			"vec3 d = fwidth( vCenter.xyz );",
+			"vec3 a3 = smoothstep( vec3( 0.0 ), d * lineWidth, vCenter.xyz );",
+			"return min( min( a3.x, a3.y ), a3.z );",
+		"}",
+
+		"float edgeFactorQuad1() {",
+			"vec2 d = fwidth( vCenter.xy );",
+			"vec2 a2 = smoothstep( vec2( 0.0 ), d * lineWidth, vCenter.xy );",
+			"return min( a2.x, a2.y );",
+		"}",
+
+		"float edgeFactorQuad2() {",
+			"vec2 d = fwidth( 1.0 - vCenter.xy );",
+			"vec2 a2 = smoothstep( vec2( 0.0 ), d * lineWidth, 1.0 - vCenter.xy );",
+			"return min( a2.x, a2.y );",
+		"}",
+
+		"void main() {",
+			"if ( vCenter.w == 0.0 ) {",
+				"gl_FragColor.rgb = mix( vec3( 1.0 ), vec3( 0.2 ), edgeFactorTri() );",
+			"} else {",
+				"gl_FragColor.rgb = mix( vec3( 1.0 ), vec3( 0.2 ), min( edgeFactorQuad1(), edgeFactorQuad2() ) );",
+
+			"}",
+			"gl_FragColor.a = 1.0;",
+		"}",
+	].join('\n')
+};
 
