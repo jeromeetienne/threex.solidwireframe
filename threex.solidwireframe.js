@@ -40,8 +40,8 @@ THREEx.SolidWireframeMaterial	= function(geometry){
 THREEx.SolidWireframeMaterial.Shader = {
 	uniforms: {
 		"lineWidth"	: { type: "f", value: 4.0 },
-		"faceColor"	: { type: "c", value: new THREE.Color( 0xffffff ) },
-		"lineColor"	: { type: "c", value: new THREE.Color( 0x222222 ) },
+		"faceColor"	: { type: "c", value: new THREE.Color( 0x222222 ) },
+		"lineColor"	: { type: "c", value: new THREE.Color( 0xffffff ) },
 	},
 	vertexShader: [
 		"attribute vec4 center;",
