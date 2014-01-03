@@ -39,7 +39,9 @@ THREEx.SolidWireframeMaterial	= function(geometry){
 
 THREEx.SolidWireframeMaterial.Shader = {
 	uniforms: {
-		"lineWidth"	: { type: "f", value: 5.0 },
+		"lineWidth"	: { type: "f", value: 4.0 },
+		"faceColor"	: { type: "c", value: new THREE.Color( 0xffffff ) },
+		"lineColor"	: { type: "c", value: new THREE.Color( 0x222222 ) },
 	},
 	vertexShader: [
 		"attribute vec4 center;",
@@ -57,6 +59,8 @@ THREEx.SolidWireframeMaterial.Shader = {
 		"varying vec4 vCenter;",
 		// control parameter
 		"uniform float lineWidth;",
+                "uniform vec3 faceColor;",
+                "uniform vec3 lineColor;",	
 
 		"float edgeFactorTri() {",
 			"vec3 d = fwidth( vCenter.xyz );",
@@ -78,9 +82,9 @@ THREEx.SolidWireframeMaterial.Shader = {
 
 		"void main() {",
 			"if ( vCenter.w == 0.0 ) {",
-				"gl_FragColor.rgb = mix( vec3( 1.0 ), vec3( 0.2 ), edgeFactorTri() );",
+				"gl_FragColor.rgb = mix( lineColor, faceColor, edgeFactorTri() );",
 			"} else {",
-				"gl_FragColor.rgb = mix( vec3( 1.0 ), vec3( 0.2 ), min( edgeFactorQuad1(), edgeFactorQuad2() ) );",
+				"gl_FragColor.rgb = mix( lineColor, faceColor, min( edgeFactorQuad1(), edgeFactorQuad2() ) );",
 
 			"}",
 			"gl_FragColor.a = 1.0;",
